@@ -1,7 +1,9 @@
 let express = require('express');
 let app = express();
+require('dotenv').config();
 let bodyParser = require('body-parser');
 let assignment = require('./routes/assignments');
+let authController = require('./auth/AuthController');
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -37,6 +39,9 @@ app.use(function (req, res, next) {
 // Pour les formulaires
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+// Pour l'auth
+app.use('/api/auth', authController);
 
 let port = process.env.PORT || 8010;
 
