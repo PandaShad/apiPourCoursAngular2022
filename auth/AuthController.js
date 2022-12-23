@@ -11,21 +11,30 @@ let bcrypt = require('bcryptjs');
 let config = require('../config');
 
 router.post('/register', (req, res) => {
-    let hashedPassword = bcrypt.hashSync(req.body.password, 8);
-    User.create({
-        first_name: req.body.first_name,
-        last_name: req.body.last_name,
-        email: req.body.email,
-        password: hashedPassword
-    },
+    User.findOne({
+        email: req.body.email
+    }, 
     (err, user) => {
-        if(err){
-            return res.status(500).send("There was a problem registering the user");
+        if(user){
+            return res.status(400).send('A user with that email has already registered. Please use a different email..');
+        } else {
+            let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+            User.create({
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                email: req.body.email,
+                password: hashedPassword
+            },
+            (err, user) => {
+                if(err){
+                    return res.status(500).send("There was a problem registering the user");
+                }
+                let token = jwt.sign({id: user._id}, config.secret, {
+                    expiresIn: 86400
+                });
+                res.status(200).send({auth: true, token: token});
+            });
         }
-        let token = jwt.sign({id: user._id}, config.secret, {
-            expiresIn: 86400
-        });
-        res.status(200).send({auth: true, token: token});
     });
 });
 
