@@ -16,16 +16,18 @@ router.post('/register', (req, res) => {
     }, 
     (err, user) => {
         if(user){
-            return res.status(400).send('A user with that email has already registered. Please use a different email..');
+            return res.status(409).send('A user with that email has already registered. Please use a different email..');
         } else {
             let hashedPassword = bcrypt.hashSync(req.body.password, 8);
             User.create({
                 first_name: req.body.first_name,
                 last_name: req.body.last_name,
                 email: req.body.email,
-                password: hashedPassword
+                password: hashedPassword,
+                assignements: []
             },
             (err, user) => {
+                console.log('user =>', user)
                 if(err){
                     return res.status(500).send("There was a problem registering the user");
                 }
@@ -76,7 +78,12 @@ router.post('/login', (req, res) => {
         let token = jwt.sign({id: user._id}, config.secret, {
             expiresIn: 86400
         });
-        res.status(200).send({auth: true, token: token});
+        const {password, ...userData} = user; // Return all the user Data except password
+        res.status(200).send({
+            auth: true, 
+            token: token, 
+            user: user
+        });
     });
 });
 
