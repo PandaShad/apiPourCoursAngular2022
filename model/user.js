@@ -6,6 +6,14 @@ let UserSchema = Schema({
     last_name: String,
     email: String,
     password: String,
-    assignements: [{type: mongoose.Schema.Types.ObjectId, ref: 'assignments'}],
+    assignements: [
+        {
+            id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'assignments'
+            },
+            deliverDate: Date
+        }
+    ],
 });
 module.exports = mongoose.model('user', UserSchema);

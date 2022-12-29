@@ -3,7 +3,9 @@ let app = express();
 require('dotenv').config();
 let bodyParser = require('body-parser');
 let assignment = require('./routes/assignments');
-let authController = require('./auth/AuthController');
+
+const authController = require('./controllers/auth/AuthController');
+const subjectController = require('./controllers/subject/SubjectController')
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -41,13 +43,16 @@ app.use(function (req, res, next) {
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-// Pour l'auth
-app.use('/api/auth', authController);
-
 let port = process.env.PORT || 8010;
 
 // les routes
 const prefix = '/api';
+
+// Pour l'auth
+app.use(`${prefix}/auth`, authController);
+
+// Pour les Subjects
+app.use(`${prefix}/subjects`, subjectController);
 
 app.route(prefix + '/assignments')
   .get(assignment.getAssignments);
