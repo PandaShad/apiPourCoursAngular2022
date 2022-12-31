@@ -2,7 +2,18 @@ let Assignment = require('../model/assignment');
 
 // Récupérer tous les assignments (GET)
 function getAssignments(req, res){
-    let aggregateQuery = Assignment.aggregate();
+    const sortBy = req.query.sortBy;
+    const sortOrder = parseInt(req.query.sortOrder);
+
+    let sort = {};
+    sort[sortBy] = sortOrder;
+    console.log('sort =>', sort)
+
+    let aggregateQuery = Assignment.aggregate([
+        {
+            $sort: sort
+        }
+    ]);
     Assignment.aggregatePaginate(aggregateQuery, 
         {
             page: parseInt(req.query.page) || 1,
