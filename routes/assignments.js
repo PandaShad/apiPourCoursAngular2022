@@ -4,16 +4,15 @@ let Assignment = require('../model/assignment');
 function getAssignments(req, res){
     const sortBy = req.query.sortBy;
     const sortOrder = parseInt(req.query.sortOrder);
-
     let sort = {};
     sort[sortBy] = sortOrder;
-    console.log('sort =>', sort)
-
-    let aggregateQuery = Assignment.aggregate([
-        {
-            $sort: sort
-        }
-    ]);
+    const pipeline = [{$sort: sort}];
+    if(req.query.returned){
+        pipeline.push({
+            $match: {rendu: (req.query.returned === 'true')}
+        });
+    }
+    let aggregateQuery = Assignment.aggregate(pipeline);
     Assignment.aggregatePaginate(aggregateQuery, 
         {
             page: parseInt(req.query.page) || 1,

@@ -63,4 +63,16 @@ router.delete('/:name', (req, res) => {
     })
 })
 
+router.get('/:name', (req, res) => {
+    Subject.findOne({
+        name: req.params.name.toLowerCase()
+    }, (err, subject) => {
+        if(!subject){
+            return res.status(404).send("No subject with this name was found");
+        } else {
+            res.send(subject);
+        }
+    })
+})
+
 module.exports = router;
