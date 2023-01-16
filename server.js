@@ -3,11 +3,14 @@ let app = express();
 require('dotenv').config();
 let bodyParser = require('body-parser');
 let assignment = require('./routes/assignments');
+let verifyToken = require('./controllers/auth/VerifyToken');
 
 const authController = require('./controllers/auth/AuthController');
 const subjectController = require('./controllers/subject/SubjectController')
 
 let mongoose = require('mongoose');
+const { jwt_secret } = require('./config');
+const { config } = require('dotenv');
 mongoose.Promise = global.Promise;
 //mongoose.set('debug', true);
 
@@ -32,12 +35,14 @@ mongoose.connect(uri, options)
     });
 
 // Pour accepter les connexions cross-domain (CORS)
-app.use(function (req, res, next) {
+const headers = (req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   next();
-});
+}
+
+app.use(headers);
 
 // Pour les formulaires
 app.use(bodyParser.urlencoded({extended: true}));
@@ -49,13 +54,13 @@ let port = process.env.PORT || 8010;
 const prefix = '/api';
 
 // Pour l'auth
-app.use(`${prefix}/auth`, authController);
+app.use(`${prefix}/auth`, headers, authController);
 
 // Pour les Subjects
-app.use(`${prefix}/subjects`, subjectController);
+app.use(`${prefix}/subjects`,headers, subjectController);
 
 app.route(prefix + '/assignments')
-  .get(assignment.getAssignments);
+  .get(verifyToken, assignment.getAssignments);
 
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)

@@ -1,31 +1,43 @@
+const jwt = require('jsonwebtoken');
 let Assignment = require('../model/assignment');
+let config = require('../config');
+
+// Get All Assignements
+function getAssignments(req, res){
+    Assignment.find((err, assignments) => {
+        if(err){
+            res.send(err)
+        }
+        res.send(assignments);
+    });
+}
 
 // Récupérer tous les assignments (GET)
-function getAssignments(req, res){
-    const sortBy = req.query.sortBy;
-    const sortOrder = parseInt(req.query.sortOrder);
-    let sort = {};
-    sort[sortBy] = sortOrder;
-    const pipeline = [{$sort: sort}];
-    if(req.query.returned){
-        pipeline.push({
-            $match: {rendu: (req.query.returned === 'true')}
-        });
-    }
-    let aggregateQuery = Assignment.aggregate(pipeline);
-    Assignment.aggregatePaginate(aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10,
-        },
-        (err, assignments) => {
-            if(err){
-                res.send(err)
-            }
-            res.send(assignments);
-        }
-    );
-}
+// function getAssignments(req, res){
+//     const sortBy = req.query.sortBy;
+//     const sortOrder = parseInt(req.query.sortOrder);
+//     let sort = {};
+//     sort[sortBy] = sortOrder;
+//     const pipeline = [{$sort: sort}];
+//     if(req.query.returned){
+//         pipeline.push({
+//             $match: {rendu: (req.query.returned === 'true')}
+//         });
+//     }
+//     let aggregateQuery = Assignment.aggregate(pipeline);
+//     Assignment.aggregatePaginate(aggregateQuery, 
+//         {
+//             page: parseInt(req.query.page) || 1,
+//             limit: parseInt(req.query.limit) || 10,
+//         },
+//         (err, assignments) => {
+//             if(err){
+//                 res.send(err)
+//             }
+//             res.send(assignments);
+//         }
+//     );
+// }
 
 // Récupérer un assignment par son id (GET)
 function getAssignment(req, res){
@@ -62,9 +74,7 @@ function postAssignment(req, res){
 
 // Update d'un assignment (PUT)
 function updateAssignment(req, res) {
-    console.log("UPDATE recu assignment : ");
-    console.log(req.body);
-    Assignment.findByIdAndUpdate(req.body.id, req.body, {new: true}, (err, assignment) => {
+    Assignment.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, assignment) => {
         if (err) {
             console.log(err);
             res.send(err)
